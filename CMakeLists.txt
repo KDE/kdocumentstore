@@ -8,22 +8,58 @@ find_package(Qt5 REQUIRED NO_MODULE COMPONENTS Core Test )
 find_package(KF5 REQUIRED COMPONENTS I18n Service Baloo)
 find_package(Ejdb REQUIRED)
 
-include(ECMAddTests)
-include(ECMSetupVersion)
-include(ECMAddTests)
-
 include(GenerateExportHeader)
+include(ECMGenerateHeaders)
+include(ECMPackageConfigHelpers)
+include(ECMSetupVersion)
 include(FeatureSummary)
 include(KDEInstallDirs)
 include(KDECMakeSettings)
-include(KDECompilerSettings)
+include(KDEFrameworkCompilerSettings)
+include(ECMAddTests)
+
+set(PROJECT_VERSION "0.1")
+ecm_setup_version(${PROJECT_VERSION} VARIABLE_PREFIX KVARIANTSTORE
+                  VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/kvariantstore_version.h"
+                  PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/KVariantStoreConfigVersion.cmake"
+)
 
 include_directories(
   ${CMAKE_SOURCE_DIR}/src
   ${EJDB_INCLUDE_DIRS}
 )
 
+# Compiler flags
+remove_definitions(-DQT_NO_CAST_FROM_ASCII)
+
+# Targets
 add_subdirectory(src)
+
+# Config Files
+set(CMAKECONFIG_INSTALL_DIR "${CMAKECONFIG_INSTALL_PREFIX}/KVariantStore")
+
+ecm_configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/KVariantStoreConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/KVariantStoreConfig.cmake"
+    INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR}
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/KVariantStoreConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/KVariantStoreConfigVersion.cmake"
+    DESTINATION ${CMAKECONFIG_INSTALL_DIR}
+    COMPONENT devel
+)
+
+install(EXPORT KVariantStoreTargets
+        DESTINATION "${CMAKECONFIG_INSTALL_DIR}"
+        FILE KVariantStoreTargets.cmake)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/kvariantstore_version.h"
+    DESTINATION ${INCLUDE_INSTALL_DIR}
+    COMPONENT Devel
+)
 
 feature_summary(WHAT ALL
     INCLUDE_QUIET_PACKAGES
