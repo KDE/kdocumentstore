@@ -66,6 +66,8 @@ void DatabaseTest::testInsertAndFetch()
     data["series"] = "Outlander";
     data["episodeNumber"] = 5;
     data["doubleValue"] = 5.44;
+    data["dateValue"] = QDate(2014, 12, 2);
+    data["dateTimeValue"] = QDateTime::currentDateTime();
 
     KVariantCollection col = db->collection("testCol");
     QString id = col.insert(data);

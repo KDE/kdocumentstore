@@ -94,8 +94,8 @@ inline bson* mapToBson(const QVariantMap& map, bool query = false)
             }
 
             case QVariant::Date: {
-                bson_date_t date = var.toDateTime().toTime_t();
-                bson_append_date(rec, key.constData(), date);
+                u_int64_t days = var.toDate().toJulianDay();
+                bson_append_timestamp2(rec, key.constData(), days, 0);
                 break;
             }
 
@@ -127,8 +127,8 @@ inline bson* mapToBson(const QVariantMap& map, bool query = false)
             }
 
             case QVariant::DateTime: {
-                bson_date_t date = var.toDateTime().toTime_t();
-                bson_append_time_t(rec, key.constData(), date);
+                bson_date_t date = var.toDateTime().toMSecsSinceEpoch();
+                bson_append_date(rec, key.constData(), date);
                 break;
             }
 
@@ -232,7 +232,7 @@ inline QVariantMap bsonToMap(bson* rec)
             }
             case BSON_DATE: {
                 bson_date_t dt = bson_iterator_date(it);
-                QDate val = QDateTime::fromTime_t(dt).date();
+                QDateTime val = QDateTime::fromMSecsSinceEpoch(dt);
                 map.insert(key, val);
                 break;
             }
@@ -261,8 +261,10 @@ inline QVariantMap bsonToMap(bson* rec)
                 break;
             }
             case BSON_TIMESTAMP: {
-                Q_ASSERT(0);
-                //bson_timestamp_t t = bson_iterator_timestamp(it);
+                bson_timestamp_t t = bson_iterator_timestamp(it);
+                QDate date = QDate::fromJulianDay(t.t);
+                map.insert(key, date);
+                break;
             }
             case BSON_LONG: {
                 long long val = bson_iterator_long(it);
