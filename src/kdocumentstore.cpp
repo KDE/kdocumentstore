@@ -17,46 +17,47 @@
  *
  */
 
-#include "kvariantquery.h"
-#include "tools.h"
+#include "kdocumentstore.h"
+#include "kdocumentcollection.h"
 
+#include <QDateTime>
+#include <QFile>
 #include <QDebug>
 
-KVariantQuery::KVariantQuery(EJQ* q, EJCOLL* coll)
-    : m_ejq(q)
-    , m_pos(-1)
+KDocumentStore::KDocumentStore()
 {
-    m_result = ejdbqryexecute(coll, q, &m_count, 0, 0);
+    m_jdb = ejdbnew();
 }
 
-KVariantQuery::~KVariantQuery()
+KDocumentStore::~KDocumentStore()
 {
-    ejdbqresultdispose(m_result);
-//    ejdbquerydel(m_ejq);
+    ejdbclose(m_jdb);
+    ejdbdel(m_jdb);
 }
 
-int KVariantQuery::totalCount()
+QString KDocumentStore::filePath() const
 {
-    return m_count;
+    return m_filePath;
 }
 
-bool KVariantQuery::next()
+void KDocumentStore::setPath(const QString& filePath)
 {
-    m_pos++;
-    return static_cast<uint32_t>(m_pos) < m_count;
+    m_filePath = filePath;
 }
 
-QVariantMap KVariantQuery::result()
+bool KDocumentStore::open()
 {
-    int size;
-    const void* data = ejdbqresultbsondata(m_result, m_pos, &size);
-    if (!data) {
-        return QVariantMap();
+    //TODO: Make sure it does not already exist and that it is not a directory!!
+    QByteArray path = QFile::encodeName(m_filePath);
+    if (!ejdbopen(m_jdb, path.constData(), JBOWRITER | JBOCREAT)) {
+        qDebug() << "Could not open db" << m_filePath;
+        return false;
     }
 
-    bson* rec = bson_create_from_buffer(data, size);
-    QVariantMap map = bsonToMap(rec);
-    bson_del(rec);
+    return true;
+}
 
-    return map;
+KDocumentCollection KDocumentStore::collection(const QString& name)
+{
+    return KDocumentCollection(m_jdb, name);
 }

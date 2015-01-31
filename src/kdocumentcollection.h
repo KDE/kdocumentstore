@@ -20,18 +20,18 @@
 #ifndef _KVARIANT_COLLECTION_H
 #define _KVARIANT_COLLECTION_H
 
-#include "kvariantstore_export.h"
+#include "kdocumentstore_export.h"
 #include <QVariantMap>
 #include <tcejdb/ejdb.h>
 
-class KVariantStore;
-class KVariantQuery;
+class KDocumentStore;
+class KDocumentQuery;
 
-class KVARIANTSTORE_EXPORT KVariantCollection
+class KDOCUMENTSTORE_EXPORT KDocumentCollection
 {
 public:
-    KVariantCollection();
-    ~KVariantCollection();
+    KDocumentCollection();
+    ~KDocumentCollection();
 
     QString collectionName() const;
 
@@ -39,17 +39,20 @@ public:
     QVariantMap fetch(const QString& id) const;
     bool remove(const QString& id);
 
-    KVariantQuery find(const QVariantMap& query, const QVariantMap& hints = QVariantMap()) const;
+    KDocumentQuery find(const QVariantMap& query, const QVariantMap& hints = QVariantMap()) const;
     int count(const QVariantMap& query) const;
     QVariantMap findOne(const QVariantMap& query, const QVariantMap& hints = QVariantMap()) const;
+
+    bool ensureIndex(const QString& propertyName);
+
 private:
-    KVariantCollection(EJDB* db, const QString& name);
+    KDocumentCollection(EJDB* db, const QString& name);
 
     EJDB* m_db;
     EJCOLL* m_coll;
     QString m_collectionName;
 
-    friend class KVariantStore;
+    friend class KDocumentStore;
 };
 
 #endif

@@ -17,34 +17,33 @@
  *
  */
 
-#ifndef _KVARIANT_QUERY_H
-#define _KVARIANT_QUERY_H
+#ifndef _KVARIANT_STORE_H
+#define _KVARIANT_STORE_H
 
-#include "kvariantstore_export.h"
+#include "kdocumentstore_export.h"
 #include <QVariantMap>
 #include <tcejdb/ejdb.h>
 
-class KVariantCollection;
+class KDocumentCollection;
 
-class KVARIANTSTORE_EXPORT KVariantQuery
+class KDOCUMENTSTORE_EXPORT KDocumentStore
 {
 public:
-    ~KVariantQuery();
+    KDocumentStore();
+    ~KDocumentStore();
 
-    int totalCount();
+    void setPath(const QString& filePath);
+    QString filePath() const;
 
-    bool next();
-    QVariantMap result();
+    bool open();
+
+    KDocumentCollection collection(const QString& name);
 
 private:
-    KVariantQuery(EJQ* q, EJCOLL* coll);
+    EJDB* m_jdb;
 
-    EJQ* m_ejq;
-    EJQRESULT m_result;
-    uint32_t m_count;
-    int m_pos;
-
-    friend class KVariantCollection;
+    QString m_filePath;
 };
 
 #endif
+

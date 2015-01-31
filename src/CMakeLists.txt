@@ -1,47 +1,47 @@
 add_subdirectory(autotest)
 
-set(KVARIANTSTORE_LIB_SRCS
-    kvariantstore.cpp
-    kvariantcollection.cpp
-    kvariantquery.cpp
+set(KDOCUMENTSTORE_LIB_SRCS
+    kdocumentstore.cpp
+    kdocumentcollection.cpp
+    kdocumentquery.cpp
 )
 
-add_library(kvariantstore SHARED ${KVARIANTSTORE_LIB_SRCS})
-target_link_libraries(kvariantstore
+add_library(kdocumentstore SHARED ${KDOCUMENTSTORE_LIB_SRCS})
+target_link_libraries(kdocumentstore
     Qt5::Core
     ${EJDB_LIBRARIES}
 )
 
 
-set_target_properties(kvariantstore PROPERTIES
-    VERSION ${KVARIANTSTORE_VERSION_STRING}
-    SOVERSION ${KVARIANTSTORE_SOVERSION}
-    EXPORT_NAME KVariantStore
+set_target_properties(kdocumentstore PROPERTIES
+    VERSION ${KDOCUMENTSTORE_VERSION_STRING}
+    SOVERSION ${KDOCUMENTSTORE_SOVERSION}
+    EXPORT_NAME KDocumentStore
 )
-target_include_directories(kvariantstore INTERFACE "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/KVariantStore>")
-generate_export_header(kvariantstore BASE_NAME KVARIANTSTORE EXPORT_FILE_NAME kvariantstore_export.h)
+target_include_directories(kdocumentstore INTERFACE "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/KDocumentStore>")
+generate_export_header(kdocumentstore BASE_NAME KDOCUMENTSTORE EXPORT_FILE_NAME kdocumentstore_export.h)
 
-ecm_generate_headers(KVariantStore_CamelCase_HEADERS
+ecm_generate_headers(KDocumentStore_CamelCase_HEADERS
     HEADER_NAMES
-    KVariantStore
-    KVariantCollection
-    KVariantQuery
+    KDocumentStore
+    KDocumentCollection
+    KDocumentQuery
 
-    PREFIX kvariantstore
-    REQUIRED_HEADERS KVariantStore_HEADERS
+    PREFIX kdocumentstore
+    REQUIRED_HEADERS KDocumentStore_HEADERS
 )
 
-install(TARGETS kvariantstore EXPORT KVariantStoreTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS kdocumentstore EXPORT KDocumentStoreTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/kvariantstore_export.h
-    ${KVariantStore_HEADERS}
-    DESTINATION ${INCLUDE_INSTALL_DIR}/KVariantStore/kvariantstore
+    ${CMAKE_CURRENT_BINARY_DIR}/kdocumentstore_export.h
+    ${KDocumentStore_HEADERS}
+    DESTINATION ${INCLUDE_INSTALL_DIR}/KDocumentStore/kdocumentstore
     COMPONENT Devel
 )
 
 install(FILES
-    ${KVariantStore_CamelCase_HEADERS}
-    DESTINATION ${INCLUDE_INSTALL_DIR}/KVariantStore/KVariantStore
+    ${KDocumentStore_CamelCase_HEADERS}
+    DESTINATION ${INCLUDE_INSTALL_DIR}/KDocumentStore/KDocumentStore
     COMPONENT Devel
 )

@@ -17,32 +17,46 @@
  *
  */
 
-#ifndef _KVARIANT_STORE_H
-#define _KVARIANT_STORE_H
+#include "kdocumentquery.h"
+#include "tools.h"
 
-#include "kvariantstore_export.h"
-#include <QVariantMap>
-#include <tcejdb/ejdb.h>
+#include <QDebug>
 
-class KVariantCollection;
-
-class KVARIANTSTORE_EXPORT KVariantStore
+KDocumentQuery::KDocumentQuery(EJQ* q, EJCOLL* coll)
+    : m_ejq(q)
+    , m_pos(-1)
 {
-public:
-    KVariantStore();
-    ~KVariantStore();
+    m_result = ejdbqryexecute(coll, q, &m_count, 0, 0);
+}
 
-    void setPath(const QString& filePath);
-    QString filePath() const;
+KDocumentQuery::~KDocumentQuery()
+{
+    ejdbqresultdispose(m_result);
+//    ejdbquerydel(m_ejq);
+}
 
-    bool open();
+int KDocumentQuery::totalCount()
+{
+    return m_count;
+}
 
-    KVariantCollection collection(const QString& name);
+bool KDocumentQuery::next()
+{
+    m_pos++;
+    return static_cast<uint32_t>(m_pos) < m_count;
+}
 
-private:
-    EJDB* m_jdb;
+QVariantMap KDocumentQuery::result()
+{
+    int size;
+    const void* data = ejdbqresultbsondata(m_result, m_pos, &size);
+    if (!data) {
+        return QVariantMap();
+    }
 
-    QString m_filePath;
-};
+    bson* rec = bson_create_from_buffer(data, size);
+    QVariantMap map = bsonToMap(rec);
+    bson_del(rec);
 
-#endif
+    return map;
+}

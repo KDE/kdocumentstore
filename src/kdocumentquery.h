@@ -17,46 +17,34 @@
  *
  */
 
-#include "kvariantstore.h"
-#include "kvariantcollection.h"
+#ifndef _KVARIANT_QUERY_H
+#define _KVARIANT_QUERY_H
 
-#include <QDateTime>
-#include <QFile>
-#include <QDebug>
+#include "kdocumentstore_export.h"
+#include <QVariantMap>
+#include <tcejdb/ejdb.h>
 
-KVariantStore::KVariantStore()
+class KDocumentCollection;
+
+class KDOCUMENTSTORE_EXPORT KDocumentQuery
 {
-    m_jdb = ejdbnew();
-}
+public:
+    ~KDocumentQuery();
 
-KVariantStore::~KVariantStore()
-{
-    ejdbclose(m_jdb);
-    ejdbdel(m_jdb);
-}
+    int totalCount();
 
-QString KVariantStore::filePath() const
-{
-    return m_filePath;
-}
+    bool next();
+    QVariantMap result();
 
-void KVariantStore::setPath(const QString& filePath)
-{
-    m_filePath = filePath;
-}
+private:
+    KDocumentQuery(EJQ* q, EJCOLL* coll);
 
-bool KVariantStore::open()
-{
-    QByteArray path = QFile::encodeName(m_filePath);
-    if (!ejdbopen(m_jdb, path.constData(), JBOWRITER | JBOCREAT)) {
-        qDebug() << "Could not open db" << m_filePath;
-        return false;
-    }
+    EJQ* m_ejq;
+    EJQRESULT m_result;
+    uint32_t m_count;
+    int m_pos;
 
-    return true;
-}
+    friend class KDocumentCollection;
+};
 
-KVariantCollection KVariantStore::collection(const QString& name)
-{
-    return KVariantCollection(m_jdb, name);
-}
+#endif

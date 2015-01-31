@@ -17,20 +17,20 @@
  *
  */
 
-#include "kvariantcollection.h"
-#include "kvariantquery.h"
+#include "kdocumentcollection.h"
+#include "kdocumentquery.h"
 #include "tools.h"
 
 #include <QDateTime>
 #include <QFile>
 #include <QDebug>
 
-KVariantCollection::KVariantCollection()
+KDocumentCollection::KDocumentCollection()
     : m_db(0)
 {
 }
 
-KVariantCollection::KVariantCollection(EJDB* db, const QString& name)
+KDocumentCollection::KDocumentCollection(EJDB* db, const QString& name)
     : m_db(db)
     , m_collectionName(name)
 {
@@ -42,16 +42,16 @@ KVariantCollection::KVariantCollection(EJDB* db, const QString& name)
     Q_ASSERT(m_coll);
 }
 
-KVariantCollection::~KVariantCollection()
+KDocumentCollection::~KDocumentCollection()
 {
 }
 
-QString KVariantCollection::collectionName() const
+QString KDocumentCollection::collectionName() const
 {
     return m_collectionName;
 }
 
-QString KVariantCollection::insert(const QVariantMap& map)
+QString KDocumentCollection::insert(const QVariantMap& map)
 {
     bson* rec = mapToBson(map);
 
@@ -72,7 +72,7 @@ QString KVariantCollection::insert(const QVariantMap& map)
     return QString::fromUtf8(id);
 }
 
-QVariantMap KVariantCollection::fetch(const QString& id) const
+QVariantMap KDocumentCollection::fetch(const QString& id) const
 {
     bson_oid_t oid;
     bson_oid_from_string(&oid, id.toUtf8().constData());
@@ -89,7 +89,7 @@ QVariantMap KVariantCollection::fetch(const QString& id) const
     return map;
 }
 
-bool KVariantCollection::remove(const QString& id)
+bool KDocumentCollection::remove(const QString& id)
 {
     bson_oid_t oid;
     bson_oid_from_string(&oid, id.toUtf8().constData());
@@ -97,13 +97,13 @@ bool KVariantCollection::remove(const QString& id)
     return ejdbrmbson(m_coll, &oid);
 }
 
-KVariantQuery KVariantCollection::find(const QVariantMap& map, const QVariantMap& hints) const
+KDocumentQuery KDocumentCollection::find(const QVariantMap& map, const QVariantMap& hints) const
 {
     bson* rec = mapToBson(map, true);
     bson* hint = mapToBson(hints, true);
 
     EJQ* q = ejdbcreatequery(m_db, rec, 0, 0, hint);
-    KVariantQuery query(q, m_coll);
+    KDocumentQuery query(q, m_coll);
 
     ejdbquerydel(q);
 
@@ -113,7 +113,7 @@ KVariantQuery KVariantCollection::find(const QVariantMap& map, const QVariantMap
     return query;
 }
 
-int KVariantCollection::count(const QVariantMap& map) const
+int KDocumentCollection::count(const QVariantMap& map) const
 {
     bson* rec = mapToBson(map, true);
 
@@ -126,7 +126,7 @@ int KVariantCollection::count(const QVariantMap& map) const
     return count;
 }
 
-QVariantMap KVariantCollection::findOne(const QVariantMap& query, const QVariantMap& hintMap) const
+QVariantMap KDocumentCollection::findOne(const QVariantMap& query, const QVariantMap& hintMap) const
 {
     bson* rec = mapToBson(query, true);
     bson* hint = mapToBson(hintMap, true);
@@ -151,5 +151,11 @@ QVariantMap KVariantCollection::findOne(const QVariantMap& query, const QVariant
     bson_del(rec);
     return map;
 
+}
+
+bool KDocumentCollection::ensureIndex(const QString& propertyName)
+{
+    QByteArray name = propertyName.toUtf8();
+    return ejdbsetindex(m_coll, name.constData(), JBIDXSTR);
 }
 
